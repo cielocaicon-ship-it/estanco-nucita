@@ -1,0 +1,170 @@
+/* Estanco Nucita — estilos */
+/* =========================================================
+   VARIABLES DE COLOR (interfaz)
+   ========================================================= */
+:root{
+  --bg:#fbeecb;
+  --panel:#fffaf0;
+  --ink:#3d1f08;
+  --vino:#6b3410;
+  --rosa:#f0a01c;
+  --dorado:#ffd54a;
+  --btn:#ffffff;
+  --btn-ink:#3d1f08;
+  --btn-borde:#6b3410;
+  --sombra:#4a2408;
+  --font:'Press Start 2P', ui-monospace, 'Courier New', monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1d1307; --panel:#2b1d0c; --ink:#fdeccb; --btn:#3a2810; --btn-ink:#fdeccb; --btn-borde:#f0a01c; --sombra:#000;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1d1307; --panel:#2b1d0c; --ink:#fdeccb; --btn:#3a2810; --btn-ink:#fdeccb; --btn-borde:#f0a01c; --sombra:#000;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font-family:var(--font);touch-action:manipulation;cursor:pointer}
+button:focus-visible{outline:3px solid var(--dorado);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* =========================================================
+   ESTRUCTURA
+   ========================================================= */
+#app{height:100%;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:6px 8px}
+#hud{display:flex;align-items:center;gap:10px;padding:6px 4px;font-size:11px}
+#hud .marca{color:var(--vino);font-size:13px;margin-right:auto;white-space:nowrap}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #hud .marca{color:var(--rosa)} }
+:root[data-theme="dark"] #hud .marca{color:var(--rosa)}
+#hud .dato{white-space:nowrap}
+#hearts{font-size:14px;letter-spacing:-1px}
+#mute{background:var(--btn);color:var(--btn-ink);border:3px solid var(--btn-borde);border-radius:10px;font-size:16px;width:42px;height:38px;padding:0}
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:2px 0}
+canvas{box-sizing:content-box;display:block;border-radius:14px;border:4px solid var(--vino);box-shadow:0 5px 0 var(--sombra);touch-action:none;background:#b86a4c}
+
+#controls{padding:8px 0 4px}
+#productos{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+@media (min-width:700px){ #productos{grid-template-columns:repeat(6,1fr)} }
+.prod{position:relative;background:var(--btn);color:var(--btn-ink);border:3px solid var(--btn-borde);border-radius:14px;
+  box-shadow:0 4px 0 var(--sombra);min-height:58px;padding:6px 4px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:transform .06s, opacity .2s}
+.prod .emo{font-size:24px;line-height:1}
+.prod .nom{font-size:8px;line-height:1.2;text-align:center}
+.prod kbd,#pet kbd{position:absolute;top:3px;left:5px;font-family:var(--font);font-size:7px;opacity:.6}
+.prod:active,.prod.press,#pet:active,#pet.press{transform:translateY(3px);box-shadow:0 1px 0 var(--sombra)}
+.prod.idle{opacity:.55}
+#fila2{display:flex;gap:7px;margin-top:7px;align-items:stretch}
+#pet{position:relative;background:var(--dorado);color:#3d1f08;border:3px solid var(--btn-borde);border-radius:14px;box-shadow:0 4px 0 var(--sombra);
+  font-size:9px;padding:8px 10px 8px 12px;min-height:48px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+#pet .emo{font-size:20px}
+#tono{position:relative;background:#9fdcff;color:#0f2a3d;border:3px solid var(--btn-borde);border-radius:14px;box-shadow:0 4px 0 var(--sombra);
+  font-size:9px;padding:8px 10px 8px 12px;min-height:48px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+#tono .emo{font-size:20px}
+#tono kbd{position:absolute;top:3px;left:5px;font-family:var(--font);font-size:7px;opacity:.6}
+#tono:active,#tono.press{transform:translateY(3px);box-shadow:0 1px 0 var(--sombra)}
+#musica{background:var(--btn);color:var(--btn-ink);border:3px solid var(--btn-borde);border-radius:10px;font-size:16px;width:42px;height:38px;padding:0}
+@media (max-width:440px){ #pet .txt,#tono .txt{display:none} }
+#pet.usado{opacity:.5}
+#status{flex:1;display:flex;align-items:center;font-size:8px;line-height:1.6;padding:4px 10px;border-radius:12px;background:var(--panel);border:2px dashed var(--btn-borde);min-width:0}
+@media (max-width:480px){ #hud .marca{display:none} #pet .txt{font-size:8px} }
+
+/* =========================================================
+   PANTALLAS (inicio y final)
+   ========================================================= */
+.capa{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(50,25,5,.55);padding:16px;z-index:5}
+.capa[hidden]{display:none}
+.tarjeta{background:var(--panel);color:var(--ink);border:4px solid var(--vino);border-radius:20px;box-shadow:0 8px 0 var(--sombra);
+  max-width:540px;width:100%;max-height:100%;overflow:auto;padding:20px 18px;text-align:center}
+.tarjeta h1{font-size:24px;margin:4px 0 6px;color:var(--rosa);text-shadow:3px 3px 0 var(--vino);line-height:1.3}
+.tarjeta h2{font-size:15px;margin:4px 0 12px;color:var(--rosa);text-shadow:2px 2px 0 var(--vino);line-height:1.5}
+.tarjeta .sub{font-size:9px;margin:0 0 14px;opacity:.85}
+.tarjeta ul{text-align:left;font-size:9px;line-height:1.9;padding-left:18px;margin:0 0 16px}
+.tarjeta li{margin-bottom:6px}
+.tarjeta p{font-size:10px;line-height:1.9;margin:8px 0}
+.grande{background:var(--rosa);color:#fff;border:4px solid var(--vino);border-radius:16px;box-shadow:0 5px 0 var(--sombra);font-size:13px;padding:14px 22px;margin-top:6px}
+.grande:active{transform:translateY(3px);box-shadow:0 2px 0 var(--sombra)}
+#plata{font-size:13px;color:var(--vino)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #plata{color:var(--dorado)} }
+:root[data-theme="dark"] #plata{color:var(--dorado)}
+/* =========================================================
+   STOCK, DISTRIBUIDORA, MENÚ Y MODO ÉLITE
+   ========================================================= */
+.prod .stock{position:absolute;top:3px;right:5px;font-size:7px;background:var(--vino);color:#fff;border-radius:8px;padding:2px 4px}
+.prod.poco .stock{background:#e8a317;color:#3b1a00}
+.prod.agotado{opacity:.4;filter:grayscale(1)}
+.prod.agotado .stock{background:#555}
+.prod.coctel{background:#2a1238;color:#ffe9a8;border-color:#d4a72c}
+.prod.coctel .stock{display:none}
+body.elite #tono{display:none}
+#receta{display:none;position:relative;background:#ffe9a8;color:#2a1238;border:3px solid #d4a72c;border-radius:14px;box-shadow:0 4px 0 var(--sombra);
+  font-size:9px;padding:8px 10px 8px 12px;min-height:48px;align-items:center;gap:8px;white-space:nowrap;animation:latido 1s infinite}
+#receta kbd{position:absolute;top:3px;left:5px;font-family:var(--font);font-size:7px;opacity:.6}
+#receta .emo{font-size:20px}
+body.elite #receta{display:flex}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion: reduce){ #receta{animation:none} }
+.t-mesero{margin:4px 0 8px;padding:10px;border:3px solid var(--btn-borde);border-radius:14px;background:rgba(255,213,74,.18);text-align:left;font-size:8px;line-height:1.9}
+.t-mesero b{font-size:9px}
+.t-mesero .t-botones{justify-content:flex-start;margin-top:6px}
+.t-mesero button{font-family:var(--font);font-size:8px;padding:8px 10px;border-radius:10px;border:3px solid var(--btn-borde);background:var(--btn);color:var(--btn-ink)}
+.t-mesero button.si{background:var(--rosa);color:#fff}
+.t-mesero button:disabled{opacity:.45}
+#jugadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:6px 0 10px}
+.jug{background:var(--btn);color:var(--btn-ink);border:3px solid var(--btn-borde);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:9px;box-shadow:0 3px 0 var(--sombra)}
+.jug .ji{font-size:7px;opacity:.8}
+.jug[aria-checked="true"]{background:var(--rosa);color:#fff;outline:3px solid var(--dorado);outline-offset:2px}
+#nuevo-jugador{margin:6px 0 4px}
+#nuevo-jugador label{display:block;font-size:9px;margin-bottom:6px}
+#nombre-jugador{font-family:var(--font);font-size:12px;padding:10px;border-radius:10px;border:3px solid var(--btn-borde);width:min(260px,100%);text-align:center;background:#fff;color:#3d1f08}
+#agitar{display:none;position:relative;background:#c9d4dc;color:#1a2430;border:3px solid #d4a72c;border-radius:14px;box-shadow:0 4px 0 var(--sombra);
+  font-size:10px;padding:8px 14px;min-height:48px;align-items:center;gap:8px;white-space:nowrap;animation:latido .5s infinite}
+#agitar .emo{font-size:22px}
+#agitar kbd{position:absolute;top:3px;left:5px;font-family:var(--font);font-size:6px;opacity:.6}
+#agitar:active,#agitar.press{transform:translateY(3px);box-shadow:0 1px 0 var(--sombra)}
+body.agitando #agitar{display:flex}
+body.agitando #receta{display:none}
+.hist-res{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:6px 0 12px}
+.hist-res div{background:rgba(255,213,74,.2);border:2px solid var(--btn-borde);border-radius:12px;padding:8px 6px;font-size:7px;line-height:1.8}
+.hist-res b{display:block;font-size:11px}
+.hist-tabla{width:100%;border-collapse:collapse;font-size:7px;line-height:1.7;margin-bottom:12px}
+.hist-tabla th,.hist-tabla td{padding:6px 4px;border-bottom:1px dashed rgba(107,52,16,.35);text-align:left}
+.hist-tabla th{font-size:7px;opacity:.8}
+.hist-vacio{font-size:8px;opacity:.8;margin:10px 0}
+#admin-pin,#admin-pin2{font-family:var(--font);font-size:18px;letter-spacing:8px;padding:10px;border-radius:10px;border:3px solid var(--btn-borde);width:150px;text-align:center;background:#fff;color:#3d1f08;margin:4px 0}
+#admin-aviso{font-size:8px;min-height:14px;color:var(--rosa)}
+#admin-estado{font-size:8px;margin:4px 0 0}
+.tarjeta h3{font-size:10px;text-align:left;margin:14px 0 6px;color:var(--vino);line-height:1.6}
+.tarjeta ol{text-align:left;font-size:9px;line-height:2;padding-left:22px;margin:0 0 12px}
+.receta-card{background:#2a1238;color:#ffe9a8;border-color:#d4a72c}
+.receta-card h2{color:#ffe9a8;text-shadow:2px 2px 0 #000}
+.receta-card li.hecho{opacity:.45;text-decoration:line-through}
+.receta-card li.ahora{color:#7dffa8}
+#aviso-ayuda{font-size:8px;color:var(--rosa);margin:6px 0 0}
+body.elite #status{background:#2a1238;color:#ffe9a8;border-color:#d4a72c}
+.tienda{max-width:620px}
+.t-fila{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:8px;padding:8px 4px;border-bottom:2px dashed rgba(107,52,16,.25);text-align:left}
+.t-fila .emo{font-size:26px;text-align:center}
+.t-fila .nom{font-size:9px;line-height:1.6}
+.t-fila .info{font-size:7px;opacity:.85;line-height:1.8}
+.t-cant{display:flex;align-items:center;gap:4px}
+.t-cant button{width:34px;height:34px;border-radius:9px;border:3px solid var(--btn-borde);background:var(--btn);color:var(--btn-ink);font-size:9px;padding:0}
+.t-cant output{min-width:22px;text-align:center;font-size:10px}
+#t-lista{margin:6px 0 10px}
+#t-total{font-size:9px}
+#t-aviso,#aviso-nueva{font-size:8px;min-height:14px;color:var(--rosa)}
+.t-botones{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.grande.sec{background:var(--btn);color:var(--btn-ink)}
+.grande:disabled{opacity:.45;cursor:not-allowed}
+.chico{background:none;border:none;color:var(--ink);text-decoration:underline;font-size:9px;margin-top:12px;padding:6px}
+#progreso,#ahorro,#razon,#meta-res,#cuentas,#estrellas-res{font-size:9px}
+#estrellas{font-size:11px;letter-spacing:-1px}
+@media (max-width:560px){ #estrellas{font-size:9px} }
+#menu{background:var(--btn);color:var(--btn-ink);border:3px solid var(--btn-borde);border-radius:10px;font-size:16px;width:42px;height:38px;padding:0}
+@media (max-width:480px){ #hud{font-size:8px;gap:6px} #hearts{font-size:11px} #menu,#mute,#musica{width:34px;height:32px;font-size:14px} }
+@media (max-width:420px){ .t-fila{grid-template-columns:30px 1fr} .t-cant{grid-column:1 / -1;justify-content:flex-end} }
+@media (prefers-reduced-motion: reduce){ .prod,#pet{transition:none} }

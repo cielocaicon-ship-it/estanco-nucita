@@ -1,0 +1,6 @@
+Pon aquí tus canciones en MP3 (por ejemplo cancion1.mp3, cancion2.mp3).
+Luego, en js/juego.js, busca la línea:
+  const CANCIONES = [];
+y cámbiala por:
+  const CANCIONES = ['musica/cancion1.mp3', 'musica/cancion2.mp3'];
+Usa nombres sin espacios ni tildes.

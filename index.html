@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estanco Nucita — Cerveza bien fría</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <span class="marca" id="marca">Estanco Nucita</span>
+    <span class="dato" id="money" aria-label="Plata ganada">$0</span>
+    <span class="dato" id="level">Nivel 1</span>
+    <span class="dato" id="meta" aria-label="Meta del día">🎯 0/8</span>
+    <span class="dato" id="estrellas" aria-label="Estrellas del estanco">⭐⭐☆☆☆</span>
+    <span class="dato" id="hearts" aria-label="Intentos que quedan: 5">❤️❤️❤️❤️❤️</span>
+    <button id="menu" aria-label="Salir al menú, tecla Esc" title="Salir al menú (Esc)">🏠</button>
+    <button id="musica" aria-label="Poner tus propias canciones" title="Poner tus canciones (N = siguiente)">🎵</button>
+    <input type="file" id="archivos" accept="audio/*" multiple hidden>
+    <button id="mute" aria-pressed="false" aria-label="Silenciar sonido" title="Sonido y música (tecla M)">🔊</button>
+  </header>
+
+  <main id="stage">
+    <canvas id="game" role="img" aria-label="Estanco Nucita visto desde arriba: seis mesas plásticas rojas con clientes, Pamela con su balde de cervezas y su perrito Nucita"></canvas>
+  </main>
+
+  <section id="controls" aria-label="Controles del juego">
+    <div id="productos" role="group" aria-label="Productos del estanco"></div>
+    <div id="fila2">
+      <button id="pet" aria-label="Acariciar a Nucita, tecla P"><kbd>P</kbd><span class="emo">🐶</span><span class="txt">Acariciar a Nucita</span></button>
+      <button id="tono" aria-label="Llamar a Toño para que limpie, tecla L"><kbd>L</kbd><span class="emo">🧹</span><span class="txt">Llamar a Toño</span></button>
+      <button id="agitar" aria-label="Agitar la coctelera, tecla Espacio"><kbd>ESPACIO</kbd><span class="emo">🍸</span><span class="txt">¡Agitar!</span></button>
+      <button id="receta" aria-label="Ver la receta del coctel, tecla R"><kbd>R</kbd><span class="emo">📖</span><span class="txt">Ver receta</span></button>
+      <div id="status" aria-live="polite">Toca una mesa para atender</div>
+    </div>
+  </section>
+  <p id="sr" class="sr-only" aria-live="assertive"></p>
+</div>
+
+<!-- Pantalla de inicio -->
+<div class="capa" id="inicio" role="dialog" aria-modal="true" aria-labelledby="t-inicio">
+  <div class="tarjeta">
+    <h1 id="t-inicio">Estanco Nucita</h1>
+    <p class="sub">Pamela y su perrito Nucita venden cerveza bien fría en el estanco del barrio</p>
+    <div id="jugadores" role="radiogroup" aria-label="Escoge quién va a jugar"></div>
+    <div id="nuevo-jugador" hidden>
+      <label for="nombre-jugador">¿Cómo se llama el jugador?</label>
+      <input id="nombre-jugador" maxlength="14" autocomplete="off" placeholder="Ej: Ana">
+      <div class="t-botones">
+        <button class="grande" id="btn-crear">✨ Crear y jugar</button>
+        <button class="grande sec" id="btn-cancelar-nuevo">Cancelar</button>
+      </div>
+    </div>
+    <div class="t-botones" id="acciones-jugador">
+      <button class="grande" id="btn-continuar">▶ Continuar</button>
+      <button class="grande sec" id="btn-nueva">✨ Reiniciar partida</button>
+    </div>
+    <p id="aviso-nueva" aria-live="polite"></p>
+    <button class="chico" id="btn-agregar">➕ Nuevo jugador</button>
+    <button class="chico" id="btn-hist">📊 Historial</button>
+    <button class="chico" id="btn-admin">🔐 Administradora</button>
+    <p id="admin-estado"></p>
+    <button class="chico" id="btn-borrar">🗑 Borrar jugador</button>
+    <p id="aviso-ayuda">⚠️ Antes de empezar te mostramos cómo se juega. ¡Léelo, hay partes que si no, no se entienden!</p>
+    <button class="chico" id="btn-ayuda" aria-haspopup="dialog">📖 Cómo se juega</button>
+  </div>
+</div>
+
+<!-- Instrucciones -->
+<div class="capa" id="ayuda" role="dialog" aria-modal="true" aria-labelledby="t-ayuda" hidden>
+  <div class="tarjeta">
+    <h2 id="t-ayuda">📖 Cómo se juega</h2>
+    <h3>🍺 1. Atender las mesas</h3>
+    <ul>
+      <li>Cuando un cliente levanta la mano, toca su mesa (o las teclas Q W E / A S D). Pamela camina hasta allá.</li>
+      <li>Al llegar, mira el globo y entrega cada producto con los botones de abajo (o teclas 1 a 6).</li>
+      <li>Cada botón dice cuántos te quedan. Si dice "Agotado", ya no tienes de eso.</li>
+      <li>Si te demoras, la barrita baja y el cliente se queja. Si llega a cero se va bravo y pierdes un ❤️. Con 5 ❤️ perdidos se cierra el día.</li>
+      <li>🐶 Acariciar a Nucita (P) calma un poquito al cliente que estás atendiendo.</li>
+    </ul>
+    <h3>🧹 2. Los regueros</h3>
+    <ul>
+      <li>A veces se riega cerveza o papitas en el piso. Si Pamela lo pisa, se resbala.</li>
+      <li>Toca el reguero o el botón "Llamar a Toño" (L) y él lo limpia.</li>
+    </ul>
+    <h3>💎 3. El cliente élite y la barra de cocteles</h3>
+    <ol>
+      <li>A veces llega un cliente élite (con gafas oscuras y corona 👑). Se sienta en una mesa como los demás y su globo muestra 💎🍸.</li>
+      <li>Toca su mesa. Cuando Pamela llega, la pantalla cambia a la <b>barra de cocteles</b>.</li>
+      <li>El cliente te dice qué coctel quiere, pero NO te dice cómo se hace.</li>
+      <li>Toca <b>📖 Ver receta</b> (o R) para ver los pasos. Mientras miras la receta el tiempo sigue corriendo, pero aquí tienes más tiempo.</li>
+      <li>Cierra la receta y pon los ingredientes <b>en el mismo orden</b> con los botones de abajo. Si te equivocas, el coctel se daña y empieza otra vez.</li>
+      <li>Cuando pones el último ingrediente, sale el botón <b>🍸 ¡Agitar!</b>: tócalo varias veces seguidas (o la barra Espacio) hasta llenar la barrita. Ahí sí el coctel queda listo.</li>
+      <li>Pide 2 o 3 cocteles. Al terminar deja propina y vuelves al estanco.</li>
+    </ol>
+    <h3>🛒 4. Al cerrar el día</h3>
+    <ul>
+      <li>🎯 Si cumples la meta de pedidos ganas un bono. El arriendo del local se paga siempre.</li>
+      <li>Ve a la Distribuidora La Fría y compra mercancía con lo que ganaste. Si no surtes, no tienes qué vender.</li>
+      <li>La partida se guarda sola al terminar cada día. Con 🏠 (o Esc) pausas y sales al menú.</li>
+    </ul>
+    <h3>🧑‍🍳 5. Contratar un mesero</h3>
+    <ul>
+      <li>Desde el Día 5, en la distribuidora puedes contratar a Juancho, un mesero que trabaja solo.</li>
+      <li>Él atiende las mesas normales, pero es lento: mientras tú atiendes varias, él atiende una. Los clientes élite siempre te tocan a ti.</li>
+      <li>Hay que pagarle sueldo cada día, aunque el día salga malo. Si lo capacitas sube de nivel: camina y atiende más rápido, pero gana más sueldo.</li>
+    </ul>
+    <h3>🎉 6. Eventos</h3>
+    <ul>
+      <li>⚽ <b>Noche de partido:</b> llega el doble de gente con la camiseta de la Selección. Cuando hay gol, todos se alegran y recuperan paciencia.</li>
+      <li>🌧️ <b>Lluvia:</b> llega menos gente, pero se quedan más tranquilos.</li>
+      <li>💡 <b>Apagón:</b> se va la luz un ratico y solo ves lo que alumbra la linterna de Pamela. Guíate por los globos de los pedidos.</li>
+    </ul>
+    <h3>⭐ 7. Estrellas del estanco</h3>
+    <ul>
+      <li>El estanco tiene de 1 a 5 estrellas (arriba en la pantalla y en el letrero). Empieza con 2.</li>
+      <li>Suben cuando los clientes se van felices, sobre todo si los atiendes rápido y si preparas bien los cocteles élite.</li>
+      <li>Bajan cuando un cliente se va bravo.</li>
+      <li>Con más estrellas llega más gente, vienen más clientes élite, dejan más propina y te pagan un poquito más. Con pocas, llega menos gente.</li>
+      <li>Las estrellas se guardan de un día para otro.</li>
+    </ul>
+    <h3>👥 8. Varios jugadores</h3>
+    <ul>
+      <li>En el menú puedes crear un jugador para cada persona (por ejemplo si prestas el celular). Cada uno tiene su propia partida guardada.</li>
+      <li>Toca el nombre de quien va a jugar antes de darle Continuar.</li>
+    </ul>
+    <button class="grande" id="btn-volver">¡Entendido!</button>
+  </div>
+</div>
+
+<!-- Receta del coctel -->
+<div class="capa" id="receta-dlg" role="dialog" aria-modal="true" aria-labelledby="t-receta" hidden>
+  <div class="tarjeta receta-card">
+    <h2 id="t-receta">📖 Receta</h2>
+    <ol id="receta-pasos"></ol>
+    <p class="sub">Pon los ingredientes en este orden. Si te equivocas, el coctel se daña y empiezas otra vez. ¡El tiempo sigue corriendo!</p>
+    <button class="grande" id="btn-cerrar-receta">🍸 Volver a la barra</button>
+  </div>
+</div>
+
+<!-- Modo administradora -->
+<div class="capa" id="admin" role="dialog" aria-modal="true" aria-labelledby="t-admin" hidden>
+  <div class="tarjeta">
+    <h2 id="t-admin">🔐 Administradora</h2>
+    <p id="admin-texto"></p>
+    <div id="admin-campos">
+      <input id="admin-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" aria-label="Clave de 4 números"><br>
+      <input id="admin-pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="off" aria-label="Repite la clave" placeholder="Repite">
+    </div>
+    <p id="admin-aviso" aria-live="polite"></p>
+    <div class="t-botones">
+      <button class="grande" id="btn-admin-ok">Entrar</button>
+      <button class="grande sec" id="btn-admin-cerrar">Volver</button>
+    </div>
+    <button class="chico" id="btn-admin-cambiar" hidden>Cambiar mi clave</button>
+  </div>
+</div>
+
+<!-- Historial del jugador -->
+<div class="capa" id="hist" role="dialog" aria-modal="true" aria-labelledby="t-hist" hidden>
+  <div class="tarjeta">
+    <h2 id="t-hist">📊 Historial</h2>
+    <div id="hist-cont"></div>
+    <button class="grande" id="btn-cerrar-hist">Volver</button>
+  </div>
+</div>
+
+<!-- Pausa: salir al menú -->
+<div class="capa" id="salir" role="dialog" aria-modal="true" aria-labelledby="t-salir" hidden>
+  <div class="tarjeta">
+    <h2 id="t-salir">⏸ Juego en pausa</h2>
+    <p>¿Quieres salir al menú?</p>
+    <p class="sub">Lo que llevas de hoy no se guarda. Tu partida queda como estaba al empezar el día.</p>
+    <div class="t-botones">
+      <button class="grande" id="btn-seguir">▶ Seguir jugando</button>
+      <button class="grande sec" id="btn-salir">🏠 Salir al menú</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pantalla final -->
+<div class="capa" id="final" role="dialog" aria-modal="true" aria-labelledby="t-final" hidden>
+  <div class="tarjeta">
+    <h2 id="t-final">El Estanco Nucita cerró por hoy</h2>
+    <p id="razon"></p>
+    <p id="plata">Hoy ganaste $0 en 0 pedidos</p>
+    <p id="meta-res"></p>
+    <p id="estrellas-res"></p>
+    <p id="cuentas"></p>
+    <p id="ahorro"></p>
+    <p id="mensaje"></p>
+    <div class="t-botones">
+      <button class="grande" id="btn-tienda">🛒 Ir a surtir</button>
+      <button class="grande sec" id="btn-otra">Abrir otro día</button>
+      <button class="grande" id="btn-cero2" hidden>Empezar de cero</button>
+    </div>
+    <button class="chico" id="btn-menu-final">🏠 Salir al menú</button>
+  </div>
+</div>
+
+<!-- Distribuidora -->
+<div class="capa" id="tienda" role="dialog" aria-modal="true" aria-labelledby="t-tienda" hidden>
+  <div class="tarjeta tienda">
+    <h2 id="t-tienda">🛒 Distribuidora La Fría</h2>
+    <p class="sub">Surte el estanco con la plata que ganaste</p>
+    <p id="t-plata">Tienes $0</p>
+    <div id="t-lista"></div>
+    <p id="t-total">Total: $0</p>
+    <div id="t-mesero" class="t-mesero"></div>
+    <p id="t-aviso" aria-live="polite"></p>
+    <div class="t-botones">
+      <button class="grande" id="t-pagar">Pagar</button>
+      <button class="grande sec" id="t-abrir">Abrir otro día</button>
+    </div>
+    <button class="chico" id="t-menu">🏠 Salir al menú</button>
+  </div>
+</div>
+
+<script src="js/juego.js"></script>
+</body>
+</html>
